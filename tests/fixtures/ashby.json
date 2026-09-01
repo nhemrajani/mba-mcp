@@ -1,0 +1,19 @@
+{
+  "jobs": [
+    {
+      "title": "MBA Intern, Corporate Strategy",
+      "location": "San Francisco, CA",
+      "isListed": true,
+      "publishedAt": "2026-08-10T17:22:31.000Z",
+      "jobUrl": "https://jobs.ashbyhq.com/ashbyco/1a2b3c",
+      "employmentType": "Intern"
+    },
+    {
+      "title": "Confidential Role",
+      "location": "New York, NY",
+      "isListed": false,
+      "publishedAt": "2026-08-01T00:00:00.000Z",
+      "jobUrl": "https://jobs.ashbyhq.com/ashbyco/hidden"
+    }
+  ]
+}

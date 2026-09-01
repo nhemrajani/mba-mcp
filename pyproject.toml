@@ -1,0 +1,50 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mba-mcp"
+version = "0.2.0"
+description = "An MCP server that runs an MBA recruiting campaign from inside your AI assistant."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+authors = [{ name = "Neeharika Hemrajani" }]
+keywords = ["mcp", "recruiting", "mba", "jobs", "networking", "consulting", "investment-banking"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business",
+]
+dependencies = [
+    "fastmcp>=2.0",
+    "httpx>=0.27",
+    "pydantic>=2.6",
+]
+
+[project.optional-dependencies]
+gmail = [
+    "google-api-python-client>=2.120",
+    "google-auth-oauthlib>=1.2",
+]
+dev = [
+    "pytest>=8.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/YOUR-GITHUB-USERNAME/mba-mcp"
+Issues = "https://github.com/YOUR-GITHUB-USERNAME/mba-mcp/issues"
+
+[project.scripts]
+mba-mcp = "mba_mcp.__main__:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mba_mcp"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

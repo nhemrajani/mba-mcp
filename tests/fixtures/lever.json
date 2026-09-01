@@ -1,0 +1,17 @@
+[
+  {
+    "id": "8e1a1b2c-1111-4444-9999-abcdefabcdef",
+    "text": "MBA Summer Associate",
+    "hostedUrl": "https://jobs.lever.co/leverco/8e1a1b2c",
+    "applyUrl": "https://jobs.lever.co/leverco/8e1a1b2c/apply",
+    "createdAt": 1753704000000,
+    "categories": { "location": "Boston, MA", "team": "Strategy", "commitment": "Intern" }
+  },
+  {
+    "id": "9f2b2c3d-2222-5555-0000-bbbbccccdddd",
+    "text": "Senior Engineer",
+    "hostedUrl": "https://jobs.lever.co/leverco/9f2b2c3d",
+    "createdAt": 1740000000000,
+    "categories": { "location": "Remote - US" }
+  }
+]

@@ -1,0 +1,26 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Never commit credentials or personal recruiting data
+*.db
+*.sqlite3
+client_secret*.json
+gmail_token.json
+token.json
+connections.csv
+base_cv.*
+# ...but the anonymised test fixtures are part of the suite
+!tests/fixtures/*.csv
+.env
+.DS_Store
+
+build/
+dist/

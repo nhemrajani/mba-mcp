@@ -1,0 +1,19 @@
+{
+  "pack": "consulting",
+  "label": "Management consulting — MBB, Big Four strategy and boutiques",
+  "note": "A starting point, not a target list. Most consulting firms run their own careers systems rather than a public job board, so expect careers links rather than live role feeds for the big names — the campaign layer (timeline, networking, pipeline) is where this track is won anyway.",
+  "companies": [
+    {"name": "McKinsey & Company", "careers_url": "https://www.mckinsey.com/careers/search-jobs", "priority": 1},
+    {"name": "Boston Consulting Group", "careers_url": "https://careers.bcg.com/", "priority": 1},
+    {"name": "Bain & Company", "careers_url": "https://www.bain.com/careers/find-a-role/", "priority": 1},
+    {"name": "Deloitte", "careers_url": "https://apply.deloitte.com/careers", "priority": 2},
+    {"name": "EY-Parthenon", "careers_url": "https://careers.ey.com/", "priority": 2},
+    {"name": "Strategy& (PwC)", "careers_url": "https://jobs.us.pwc.com/", "priority": 2},
+    {"name": "KPMG", "careers_url": "https://www.kpmguscareers.com/", "priority": 3},
+    {"name": "Accenture Strategy", "careers_url": "https://www.accenture.com/us-en/careers", "priority": 3},
+    {"name": "Kearney", "careers_url": "https://www.kearney.com/careers", "priority": 2},
+    {"name": "Oliver Wyman", "careers_url": "https://www.oliverwyman.com/careers.html", "priority": 2},
+    {"name": "L.E.K. Consulting", "careers_url": "https://www.lek.com/careers", "priority": 2},
+    {"name": "Roland Berger", "careers_url": "https://www.rolandberger.com/en/Careers/", "priority": 3}
+  ]
+}

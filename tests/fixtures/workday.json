@@ -1,0 +1,30 @@
+{
+  "total": 36,
+  "jobPostings": [
+    {
+      "title": "Associate - Strategic Advisory (Industrials)",
+      "externalPath": "/job/London/Associate---Strategic-Advisory--Industrials-_R0003380",
+      "locationsText": "London",
+      "postedOn": "Posted 3 Days Ago",
+      "bulletFields": ["R0003380"]
+    },
+    {
+      "title": "Summer Associate - Restructuring",
+      "externalPath": "/job/New-York/Summer-Associate---Restructuring_R0003400",
+      "locationsText": "New York",
+      "postedOn": "Posted Today",
+      "bulletFields": ["R0003400"]
+    },
+    {
+      "title": "Stale posting",
+      "externalPath": "/job/London/Stale_R1",
+      "locationsText": "London",
+      "postedOn": "Posted 30+ Days Ago"
+    },
+    {
+      "title": "No path posting",
+      "locationsText": "Nowhere",
+      "postedOn": "Posted Today"
+    }
+  ]
+}

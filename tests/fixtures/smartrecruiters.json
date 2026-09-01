@@ -1,0 +1,30 @@
+{
+  "offset": 0,
+  "limit": 2,
+  "totalFound": 449,
+  "content": [
+    {
+      "id": "744000146555579",
+      "name": "Finance Associate",
+      "uuid": "b90c6887-337c-4302-bfaf-7ded5dbe575d",
+      "refNumber": "REF295167C",
+      "company": { "identifier": "AcmeGroup", "name": "Acme Group" },
+      "releasedDate": "2026-08-20T21:10:17.051Z",
+      "location": {
+        "city": "New York",
+        "region": "NY",
+        "country": "us",
+        "remote": false,
+        "fullLocation": "New York, NY, United States"
+      }
+    },
+    {
+      "id": "744000146555580",
+      "name": "Warehouse Operative",
+      "company": { "identifier": "AcmeGroup", "name": "Acme Group" },
+      "releasedDate": "2026-07-01T08:00:00.000Z",
+      "location": { "city": "Leeds", "region": "ENG", "country": "gb" }
+    },
+    { "name": "Posting with no id" }
+  ]
+}

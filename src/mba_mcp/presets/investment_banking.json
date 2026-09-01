@@ -1,0 +1,25 @@
+{
+  "pack": "investment_banking",
+  "label": "Investment banking — bulge bracket, elite boutique and buyside",
+  "note": "A starting point, not a target list. Cut it to the 10-15 firms you will actually network into, and add your own. Entries marked with a board resolve instantly; the rest are resolved from their careers page when you add them, and fall back to a careers link if their board is not machine-readable.",
+  "companies": [
+    {"name": "Citi", "careers_url": "https://jobs.citi.com/", "ats": "workday", "slug": "citi|wd5|2", "priority": 2},
+    {"name": "PJT Partners", "careers_url": "https://pjtpartners.com/careers", "ats": "workday", "slug": "pjtpartners|wd1|Careers", "priority": 1},
+    {"name": "Moelis & Company", "careers_url": "https://www.moelis.com/careers/", "ats": "workday", "slug": "moelis|wd1|Experienced-Hires", "priority": 1},
+    {"name": "Blackstone", "careers_url": "https://www.blackstone.com/careers/", "ats": "workday", "slug": "blackstone|wd1|Blackstone_Careers", "priority": 1},
+    {"name": "LionTree", "careers_url": "https://www.liontree.com/careers", "ats": "greenhouse", "slug": "liontree", "priority": 2},
+    {"name": "General Atlantic", "careers_url": "https://www.generalatlantic.com/careers/", "ats": "greenhouse", "slug": "generalatlantic", "priority": 2},
+    {"name": "Point72", "careers_url": "https://careers.point72.com/", "ats": "greenhouse", "slug": "point72", "priority": 2},
+    {"name": "AQR Capital Management", "careers_url": "https://www.aqr.com/Careers", "ats": "greenhouse", "slug": "aqr", "priority": 3},
+    {"name": "Jane Street", "careers_url": "https://www.janestreet.com/join-jane-street/", "ats": "greenhouse", "slug": "janestreet", "priority": 3},
+    {"name": "Goldman Sachs", "careers_url": "https://www.goldmansachs.com/careers/", "priority": 1},
+    {"name": "Morgan Stanley", "careers_url": "https://www.morganstanley.com/careers", "priority": 1},
+    {"name": "J.P. Morgan", "careers_url": "https://careers.jpmorgan.com/us/en/students/programs", "priority": 1},
+    {"name": "Evercore", "careers_url": "https://www.evercore.com/careers/", "priority": 1},
+    {"name": "Centerview Partners", "careers_url": "https://www.centerviewpartners.com/careers/", "priority": 1},
+    {"name": "Lazard", "careers_url": "https://www.lazard.com/careers/", "priority": 2},
+    {"name": "Perella Weinberg Partners", "careers_url": "https://pwpartners.com/careers/", "priority": 2},
+    {"name": "Houlihan Lokey", "careers_url": "https://hl.com/careers/", "priority": 2},
+    {"name": "Jefferies", "careers_url": "https://www.jefferies.com/careers/", "priority": 2}
+  ]
+}

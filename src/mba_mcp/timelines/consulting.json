@@ -1,0 +1,123 @@
+{
+  "track": "consulting",
+  "label": "Management consulting — MBA summer internship cycle",
+  "audience": "First-year MBA recruiting for a summer associate/consultant internship (US on-campus calendar; MBB and tier-2 strategy firms)",
+  "cycle_start_month": 8,
+  "disclaimer": "A curated template of a typical US M7 consulting calendar, not a feed of live firm deadlines. Firms shift dates by a week or two every year and non-US offices run their own cycles. Confirm every date against your career centre and each firm's site, then edit this file — a copy in your data dir at timelines/consulting.json overrides the bundled one.",
+  "milestones": [
+    {
+      "id": "kickoff",
+      "name": "Pre-term and recruiting kickoff",
+      "starts": "08-15",
+      "ends": "09-05",
+      "description": "Firm sites go live, consulting club onboards, resume books close. The list you build now is the campaign you run all year.",
+      "actions": [
+        "Pick 8-12 target firms and add them with add_target_company",
+        "Join the consulting club and submit to the resume book",
+        "Import your LinkedIn connections so warm paths are ready before events start",
+        "Set your base CV so the assistant can tailor against real JDs"
+      ]
+    },
+    {
+      "id": "presentations",
+      "name": "Company presentations and office hours",
+      "starts": "09-01",
+      "ends": "10-15",
+      "description": "On-campus events are where firms first put a name to your face. Attendance is tracked at most firms.",
+      "actions": [
+        "Attend every target firm's presentation and briefing",
+        "Collect names and emails of the consultants you actually spoke to",
+        "Log each conversation the same night with log_interaction",
+        "Send a short thank-you within 24 hours"
+      ]
+    },
+    {
+      "id": "networking_blitz",
+      "name": "Coffee-chat blitz",
+      "starts": "09-10",
+      "ends": "11-30",
+      "description": "The heart of consulting recruiting. Referrals and internal advocates decide who gets the first-round invite.",
+      "actions": [
+        "3-5 chats a week; 2-4 people per target firm across seniority levels",
+        "Use find_warm_paths before any cold outreach",
+        "Ask about the work, not the process",
+        "Set a next_followup date on every single interaction"
+      ]
+    },
+    {
+      "id": "case_prep_ramp",
+      "name": "Case and behavioral prep ramp",
+      "starts": "10-01",
+      "ends": "12-20",
+      "description": "Cases take reps, not reading. Start before applications so December is polish, not panic.",
+      "actions": [
+        "Lock in two regular case partners",
+        "15-25 live cases before the winter break",
+        "Build 6-8 STAR stories that cover leadership, conflict, failure and impact",
+        "Drill mental math and chart reading weekly"
+      ]
+    },
+    {
+      "id": "applications",
+      "name": "Applications open through deadlines",
+      "starts": "11-15",
+      "ends": "01-15",
+      "description": "Most MBB and tier-2 internship deadlines land in the first half of January. Referrals must be in place before you submit.",
+      "actions": [
+        "Track every application with track_application and set the real deadline",
+        "Tailor the CV per firm; write cover letters where they are required",
+        "Confirm a referral from your warmest contact at each firm",
+        "Submit at least a week early — portals fail on deadline day"
+      ]
+    },
+    {
+      "id": "first_rounds",
+      "name": "First-round interviews",
+      "starts": "01-20",
+      "ends": "02-10",
+      "description": "Two or three rounds of behavioral plus case, usually back to back on one day.",
+      "actions": [
+        "4-6 live cases a week through the round",
+        "Re-read your notes on everyone you met at the firm",
+        "Thank-you note to each interviewer within 24 hours",
+        "Update status to 'interview' so the pipeline stays honest"
+      ]
+    },
+    {
+      "id": "final_rounds",
+      "name": "Final rounds and decision day",
+      "starts": "02-05",
+      "ends": "02-28",
+      "description": "Partner-level cases and a real fit assessment. Firms decide the same day at most offices.",
+      "actions": [
+        "Practise partner-style, less-structured cases",
+        "Prepare a sharp answer to 'why this firm, why this office'",
+        "Have two substantive questions per interviewer"
+      ]
+    },
+    {
+      "id": "offers",
+      "name": "Offers, sell weekends and decisions",
+      "starts": "02-20",
+      "ends": "03-31",
+      "description": "Offer deadlines are short and often collide. Ask for extensions early, in writing.",
+      "actions": [
+        "Log every offer deadline as an application deadline",
+        "Attend sell weekends for the firms you are genuinely deciding between",
+        "Ask for a timing extension the day you need it, not the week it expires"
+      ]
+    },
+    {
+      "id": "second_wave",
+      "name": "Boutique and off-cycle second wave",
+      "starts": "03-01",
+      "ends": "06-15",
+      "description": "Boutiques, regional offices and specialist firms hire well after the on-campus cycle closes, largely through networks.",
+      "actions": [
+        "Add boutiques and regional offices as new targets",
+        "Run find_jobs weekly on targets whose boards you already resolved",
+        "Reactivate dormant contacts with get_followups"
+      ]
+    }
+  ]
+}

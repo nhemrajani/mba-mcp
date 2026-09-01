@@ -1,0 +1,26 @@
+{
+  "jobs": [
+    {
+      "id": 4012345,
+      "title": "Summer Associate (MBA) - Strategy",
+      "updated_at": "2026-08-02T14:11:04-04:00",
+      "first_published": "2026-07-28T09:00:00-04:00",
+      "absolute_url": "https://boards.greenhouse.io/acmeco/jobs/4012345",
+      "location": { "name": "New York, NY" },
+      "metadata": []
+    },
+    {
+      "id": 4012346,
+      "title": "Data Analyst",
+      "updated_at": "2026-06-11T08:00:00-04:00",
+      "absolute_url": "https://boards.greenhouse.io/acmeco/jobs/4012346",
+      "location": { "name": "London, UK" }
+    },
+    {
+      "id": 4012347,
+      "title": "Broken posting with no url",
+      "location": { "name": "Remote" }
+    }
+  ],
+  "meta": { "total": 3 }
+}

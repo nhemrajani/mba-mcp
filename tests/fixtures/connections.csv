@@ -1,0 +1,9 @@
+Notes:
+"When exporting your connection data, you may notice that some of the email addresses are missing. You will only see email addresses for connections who have allowed their connections to see or download their email address using this setting https://www.linkedin.com/psettings/privacy/email. You can learn more here https://www.linkedin.com/help/linkedin/answer/261"
+
+First Name,Last Name,URL,Email Address,Company,Position,Connected On
+Priya,Raman,https://www.linkedin.com/in/priyaraman,priya.raman@example.com,"Bain & Company",Consultant,18 Jun 2025
+Tom,Okafor,https://www.linkedin.com/in/tokafor,,Bain Capital,Associate,02 Feb 2021
+Dana,Whitfield,https://www.linkedin.com/in/dwhitfield,dana@example.com,"McKinsey & Company, Inc.",Campus Recruiting Lead,11 Nov 2024
+Alex,Nkemdirim,https://www.linkedin.com/in/anke,,"Acme Logistics",Operations Manager,05/14/23
+,,https://www.linkedin.com/in/ghost,,Ghost Co,Nobody,01 Jan 2020

@@ -1,0 +1,120 @@
+{
+  "track": "investment_banking",
+  "label": "Investment banking — MBA summer associate cycle",
+  "audience": "First-year MBA recruiting for a summer associate seat (US calendar; bulge bracket, elite boutique and middle market)",
+  "cycle_start_month": 4,
+  "disclaimer": "A curated template of a typical US MBA associate calendar, not live firm deadlines. Banking dates move earlier almost every year and vary by bank, group and region — several banks now run accelerated processes weeks ahead of this. Confirm every date with your finance club and each bank's campus team, then edit this file: a copy in your data dir at timelines/investment_banking.json overrides the bundled one.",
+  "milestones": [
+    {
+      "id": "pre_mba_programs",
+      "name": "Pre-MBA diversity and early insight programs",
+      "starts": "04-01",
+      "ends": "07-15",
+      "description": "Banks run fellowship and early-insight programs in the spring and summer BEFORE your first year. Several convert directly into summer associate offers, which is the single biggest head start in banking.",
+      "actions": [
+        "Apply the spring before you matriculate — most deadlines are April to June",
+        "Track each program as an application with its real deadline",
+        "Reach out to the campus recruiter for every bank you apply to"
+      ]
+    },
+    {
+      "id": "kickoff",
+      "name": "Pre-term and technical foundations",
+      "starts": "07-15",
+      "ends": "09-10",
+      "description": "Banking assumes you can already talk accounting and valuation. Non-finance backgrounds need this summer, not October.",
+      "actions": [
+        "Pick 10-15 banks across bulge bracket, elite boutique and middle market",
+        "Work through the three statements, DCF, comps and LBO basics before term starts",
+        "Join the finance club and submit to the resume book",
+        "Import your LinkedIn connections so warm paths exist before the first event"
+      ]
+    },
+    {
+      "id": "info_sessions",
+      "name": "Bank presentations and campus events",
+      "starts": "09-01",
+      "ends": "10-15",
+      "description": "Banks track attendance and pass names to the deal teams. Being a known quantity before applications is most of the game.",
+      "actions": [
+        "Attend every target bank's presentation and coffee-chat session",
+        "Collect the names of bankers and campus recruiters you actually spoke to",
+        "Log each conversation the same night and send a thank-you within 24 hours"
+      ]
+    },
+    {
+      "id": "networking_blitz",
+      "name": "Banker networking campaign",
+      "starts": "09-05",
+      "ends": "10-31",
+      "description": "The most networking-dependent track there is. Aim for coverage across groups, not just headcount — a champion in the group you want matters more than ten scattered chats.",
+      "actions": [
+        "2-4 bankers per target bank, weighted toward the groups you want",
+        "Alumni first: use find_alumni to build the LinkedIn searches",
+        "Ask about deals and group culture, never about the process",
+        "Set a next_followup date on every interaction — bankers forget fast"
+      ]
+    },
+    {
+      "id": "applications",
+      "name": "Applications and resume drops",
+      "starts": "09-15",
+      "ends": "11-15",
+      "description": "Most MBA associate applications close between early October and mid-November, and accelerated processes close sooner.",
+      "actions": [
+        "Track every application with its real deadline",
+        "Tailor the CV per bank; deal exposure and quantitative evidence up top",
+        "Have a banker flag your resume internally before you submit",
+        "Prepare 'why banking, why this bank, why this group' in three sentences"
+      ]
+    },
+    {
+      "id": "first_rounds",
+      "name": "First rounds and HireVue",
+      "starts": "10-15",
+      "ends": "11-30",
+      "description": "Behavioral plus technical, often recorded. Technicals are pass/fail — they are the floor, not the differentiator.",
+      "actions": [
+        "Drill the standard technical set until answers are automatic",
+        "Record yourself once; the video format punishes rambling",
+        "Refresh your notes on everyone you met at the bank"
+      ]
+    },
+    {
+      "id": "superdays",
+      "name": "Superdays and offers",
+      "starts": "11-15",
+      "ends": "01-31",
+      "description": "Back-to-back interviews with the group, decided same-day at many banks. Offers often come with short exploding deadlines.",
+      "actions": [
+        "Prepare a crisp deal or market view you can defend",
+        "Thank-you notes to every interviewer within 24 hours",
+        "Log offer deadlines as application deadlines the moment you get one"
+      ]
+    },
+    {
+      "id": "offers_and_decisions",
+      "name": "Offer decisions and sell days",
+      "starts": "12-15",
+      "ends": "03-15",
+      "description": "Exploding offers are common. Ask for extensions early and in writing.",
+      "actions": [
+        "Attend sell days only for banks you would genuinely accept",
+        "Ask for a timing extension the day you need it, not the week it expires",
+        "Tell the bankers who backed you either way — they remember"
+      ]
+    },
+    {
+      "id": "second_wave",
+      "name": "Middle market, boutique and off-cycle wave",
+      "starts": "01-15",
+      "ends": "05-31",
+      "description": "Middle-market banks, regional offices and boutiques hire well after the on-campus cycle, almost entirely through networks.",
+      "actions": [
+        "Add middle-market and regional banks as new targets",
+        "Run find_jobs weekly on the boards you have already resolved",
+        "Reactivate dormant contacts with get_followups"
+      ]
+    }
+  ]
+}

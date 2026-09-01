@@ -1,0 +1,76 @@
+{
+  "manifest_version": "0.2",
+  "name": "mba-mcp",
+  "display_name": "MBA Recruiting Campaign",
+  "version": "0.2.0",
+  "description": "Run your MBA recruiting campaign from inside Claude: target firms, live job boards, deadlines, warm intros and approved outreach.",
+  "long_description": "MBA recruiting is won on timelines and relationships, not application volume. This adds a campaign layer to Claude: a target-firm list that resolves each firm's live job board, an application pipeline with cycle-aware deadlines for consulting and investment banking, warm paths ranked from your own LinkedIn export, LinkedIn alumni searches you run yourself, and cold emails Claude drafts and you approve before a single message is sent from your own Gmail.\n\nEverything stays on your computer. No account, no subscription, no model API key, and no scraping of anyone's LinkedIn.",
+  "author": {
+    "name": "Neeharika Hemrajani"
+  },
+  "license": "MIT",
+  "keywords": ["mba", "recruiting", "jobs", "networking", "consulting", "investment banking", "careers"],
+  "server": {
+    "type": "python",
+    "entry_point": "server/main.py",
+    "mcp_config": {
+      "command": "python3",
+      "args": ["${__dirname}/server/main.py"],
+      "env": {
+        "PYTHONPATH": "${__dirname}/server/lib",
+        "MBA_MCP_DATA_DIR": "${user_config.data_dir}",
+        "MBA_MCP_SCHOOL": "${user_config.school}",
+        "MBA_MCP_TRACK": "${user_config.track}",
+        "GMAIL_OAUTH_CLIENT_SECRET": "${user_config.gmail_client_secret}",
+        "ADZUNA_APP_ID": "${user_config.adzuna_app_id}",
+        "ADZUNA_APP_KEY": "${user_config.adzuna_app_key}"
+      }
+    }
+  },
+  "user_config": {
+    "school": {
+      "type": "string",
+      "title": "Business school",
+      "description": "Used to rank alumni above strangers and to build LinkedIn alumni searches. Example: Wharton",
+      "required": false
+    },
+    "track": {
+      "type": "string",
+      "title": "Recruiting track",
+      "description": "consulting or investment_banking (finance and banking also work)",
+      "default": "consulting",
+      "required": false
+    },
+    "data_dir": {
+      "type": "directory",
+      "title": "Where to keep your data",
+      "description": "Your pipeline, contacts and credentials live here. Nothing leaves your computer.",
+      "default": "${HOME}/.mba-mcp",
+      "required": false
+    },
+    "gmail_client_secret": {
+      "type": "file",
+      "title": "Google OAuth client file (optional)",
+      "description": "Only needed to send email. Download it from Google Cloud — see the README.",
+      "required": false
+    },
+    "adzuna_app_id": {
+      "type": "string",
+      "title": "Adzuna app ID (optional)",
+      "description": "Free key that widens job search to firms with no readable job board.",
+      "required": false,
+      "sensitive": true
+    },
+    "adzuna_app_key": {
+      "type": "string",
+      "title": "Adzuna app key (optional)",
+      "description": "The matching key for the app ID above.",
+      "required": false,
+      "sensitive": true
+    }
+  },
+  "compatibility": {
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": { "python": ">=3.11" }
+  }
+}
