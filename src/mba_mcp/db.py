@@ -98,6 +98,28 @@ MIGRATIONS: list[str] = [
     ALTER TABLE contacts ADD COLUMN grad_year INTEGER;
     ALTER TABLE contacts ADD COLUMN notes TEXT;
     """,
+    # 3 — the coach's raw material: the resume, running updates to it, the
+    #     job description behind each application, and what the user wants.
+    """
+    CREATE TABLE resume (
+        id          INTEGER PRIMARY KEY CHECK (id = 1),
+        text        TEXT NOT NULL,
+        updated_at  TEXT NOT NULL
+    );
+
+    CREATE TABLE resume_notes (
+        id        INTEGER PRIMARY KEY AUTOINCREMENT,
+        note      TEXT NOT NULL,
+        kind      TEXT NOT NULL DEFAULT 'update',
+        added_on  TEXT NOT NULL
+    );
+
+    ALTER TABLE applications ADD COLUMN jd_text TEXT;
+
+    ALTER TABLE profile ADD COLUMN background TEXT;
+    ALTER TABLE profile ADD COLUMN goals TEXT;
+    ALTER TABLE profile ADD COLUMN hard_constraints TEXT;
+    """,
 ]
 
 SCHEMA_VERSION = len(MIGRATIONS)

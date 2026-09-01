@@ -1,8 +1,8 @@
 <h1 align="center">mba-mcp</h1>
 
 <p align="center">
-  <strong>Run your recruiting campaign from inside Claude.</strong><br>
-  Target firms, live job boards, cycle deadlines, warm intros, and cold emails you approve before they send.
+  <strong>A recruiting coach that actually remembers your campaign.</strong><br>
+  Paste your CV, tell it what you want, and it tracks the firms, deadlines, applications and people for you.
 </p>
 
 <p align="center">
@@ -19,6 +19,8 @@
 MBA recruiting is won on **timelines and relationships**, not application volume. Every LLM can already rewrite your CV. None of them know that Bain's coffee-chat window closes in nine days, that you have a Wharton alum three years ahead of you sitting in Evercore's New York office, or that you promised to follow up with her on the 14th.
 
 This gives Claude that memory. It's free, it runs entirely on your laptop, and there's no account to make.
+
+You talk to it like a coach. It reads your CV, knows your pipeline, and opens with the two things that matter this week instead of asking you to explain yourself again.
 
 **Tracks:** consulting and investment banking, both end to end.
 
@@ -78,7 +80,7 @@ Add this to `claude_desktop_config.json` (Desktop) or `~/.claude.json` (Code). E
 | `MBA_MCP_DATA_DIR` | `~/.mba-mcp` | Database, credentials, your CV |
 | `MBA_MCP_TRACK` | `consulting` | Default track (`finance`, `banking`, `IB`, `MBB` all resolve) |
 | `MBA_MCP_SCHOOL` | unset | Ranks alumni above strangers |
-| `MBA_MCP_BASE_CV` | `{data dir}/base_cv.md` | Your master CV, exposed to Claude for tailoring |
+| `MBA_MCP_BASE_CV` | `{data dir}/base_cv.md` | Optional CV file. Pasting it into the chat is easier |
 | `GMAIL_OAUTH_CLIENT_SECRET` | `{data dir}/gmail_client_secret.json` | Your own Google OAuth client |
 | `ADZUNA_APP_ID` / `_KEY` | unset | Optional wider job search |
 
@@ -87,6 +89,19 @@ Anything you set in the app's settings UI wins over these; `set_profile` wins ov
 
 ---
 
+## Start here
+
+Four conversation starters, in Claude's prompt menu (the `+` / slash menu):
+
+| | |
+|---|---|
+| **`start_here`** | Sets you up in one conversation — school, background, what you actually want, then paste your CV. Ends by telling you where you are in the cycle and what to do this week. |
+| **`catch_me_up`** | Your Monday morning. What's overdue, what closes soon, who's gone quiet, which target firms you still haven't spoken to anyone at — then the two or three things that matter, in order. |
+| **`fit_check`** | Reads your CV and tells you which firms actually suit your background, which are a stretch and what would have to be true, and which to drop. |
+| **`tailor_application`** | Works through one posting with you: what they're screening for, which of your experiences map onto it, where you're weak and how to handle it honestly. |
+
+You never have to use them — plain English works. They're just the fastest way in.
+
 ## What you can say
 
 Just talk to Claude. These are examples, not commands to memorise.
@@ -94,22 +109,26 @@ Just talk to Claude. These are examples, not commands to memorise.
 | You say | What happens |
 |---|---|
 | *"I'm a Wharton MBA, class of 2028, recruiting for banking"* | Saves your profile — this is what makes alumni matching work |
+| *paste your CV into the chat* | Stored, and used for tailoring from then on. No files, no folders |
+| *"I won the case competition last week"* | Remembered against your CV, so it shows up when you next tailor |
+| *"What should I be doing this week?"* | Overdue follow-ups, closing deadlines, firms going cold |
+| *"Which of these firms actually suit me?"* | Honest read of your background against the list |
 | *"Set up my target list for banking"* | Adds 18 firms and resolves each one's live job board |
 | *"Any new summer associate roles this week?"* | Sweeps every target's board, filtered |
 | *"Where am I in the cycle?"* | Your track's timeline, projected onto today's date |
 | *"Who do I know at Evercore?"* | Ranks your own connections, with the reason for each |
 | *"Find me Wharton alumni at Evercore"* | Builds the LinkedIn searches for you to open |
 | *"What's Priya's email likely to be?"* | Infers it from your firm's addresses you already have |
-| *"Draft a note to her, then send it"* | Claude writes it, shows you, sends one message after you say yes |
-| *"What's due this week?"* | Overdue follow-ups and approaching deadlines |
+| *"Draft a note to her"* | Claude writes it from your real history with her; you paste it into your mail |
 
 **A day in the campaign**
 
 ```
-Morning   "What's due?"              → 3 follow-ups overdue, Bain deadline in 9 days
-          "Draft the Priya one"      → Claude reads your last chat notes, writes it
-          "Send"                     → shows you the text → one email, from your Gmail
-Evening   "Add today's coffee chat"  → logged, next follow-up set for the 14th
+Monday    catch_me_up                → 3 follow-ups overdue, PJT closes in 6 days,
+                                       nobody spoken to at 5 of your target firms
+          "Draft the Priya one"      → reads your notes from the last chat, writes it
+Evening   "Coffee chat with Sam went
+           well, he offered a refer"  → logged, follow-up set, nothing to fill in
 ```
 
 ---
@@ -167,23 +186,30 @@ Every suggestion is labelled **unverified**. Nothing sends without you reading t
 
 ---
 
-## Sending email (optional)
+<details>
+<summary><strong>Advanced: let Claude send the email itself</strong></summary>
 
-Only needed if you want Claude to actually send. Skip it and drafts still work.
+Off by default, and deliberately not part of setup. Claude drafting the email and you pasting it into Gmail takes five seconds and requires nothing. This exists if you'd rather skip the paste.
+
+It's free — a Google Cloud project with the Gmail API costs nothing and needs no billing account — but it takes about ten minutes of clicking, and it only works if you can run a terminal command (the Desktop bundle can't reach it).
 
 1. In [Google Cloud Console](https://console.cloud.google.com/), create a project and enable the **Gmail API**.
 2. OAuth consent screen → **External**, leave it in **Testing**, add your own address as a test user. Testing mode works for you personally with no Google review.
 3. Create an **OAuth client ID** → **Desktop app** → download the JSON → save it to your data dir.
-4. Once, from a terminal: `mba-mcp auth`
+4. Once, from a terminal: `pip install -e '.[gmail]'` then `mba-mcp auth`
 
-Only `gmail.send` is requested. This code cannot read your mail.
+Only `gmail.send` is requested — this code cannot read your mail. Sending is one message at a time, only after you approve that specific text, and the same draft can never be sent twice.
+
+</details>
 
 ---
 
 ## Everything it can do
 
 <details open>
-<summary><strong>19 tools</strong></summary>
+<summary><strong>23 tools, 4 prompts, 7 resources</strong></summary>
+
+**Coaching** · `weekly_checkin` · `suggest_targets` · `save_resume` · `add_resume_note`
 
 **You** · `set_profile`
 
@@ -193,9 +219,11 @@ Only `gmail.send` is requested. This code cannot read your mail.
 
 **Networking** · `import_connections` · `find_warm_paths` · `find_alumni` · `log_interaction` · `get_followups`
 
-**Outreach** · `suggest_email` · `set_contact_email` · `save_outreach_draft` · `send_email`
+**Outreach** · `suggest_email` · `set_contact_email` · `save_outreach_draft` · `send_email` *(optional)*
 
-**Resources** (state Claude can read at any time) · `profile` · `targets` · `pipeline` · `contacts` · `timeline` · `base_cv`
+**Prompts** · `start_here` · `catch_me_up` · `fit_check` · `tailor_application`
+
+**Resources** (state Claude reads at any time) · `resume` · `profile` · `targets` · `pipeline` · `contacts` · `timeline`
 </details>
 
 ---
@@ -220,11 +248,11 @@ Good first issues, roughly in order of usefulness:
 
 ```bash
 pip install -e '.[dev]'
-pytest                              # 140 tests, fully offline
+pytest                              # 148 tests, fully offline
 python scripts/build_mcpb.py        # build the Desktop bundle
 ```
 
-Tests never touch the network: ATS adapters run against saved fixtures, and the guardrails have their own tests asserting that nothing sends without confirmation. Please keep both true.
+Tests never touch the network: ATS adapters run against saved fixtures, and the guardrails have their own tests asserting that nothing sends without confirmation. `tests/test_server.py` fails loudly on any accidental network call. Please keep both true.
 
 <details>
 <summary>Manual checklist for the Gmail path</summary>

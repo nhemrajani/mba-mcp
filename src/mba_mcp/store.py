@@ -99,6 +99,7 @@ def add_application(
     status: str = "interested",
     deadline: str | None = None,
     notes: str | None = None,
+    jd_text: str | None = None,
 ) -> dict:
     status = _check_status(status)
     stamp = now_iso()
@@ -106,10 +107,12 @@ def add_application(
         cursor = conn.execute(
             """
             INSERT INTO applications
-                (company, role, url, status, deadline, notes, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                (company, role, url, status, deadline, notes, jd_text,
+                 created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (company.strip(), role.strip(), url, status, deadline, notes, stamp, stamp),
+            (company.strip(), role.strip(), url, status, deadline, notes, jd_text,
+             stamp, stamp),
         )
     return get_application(conn, int(cursor.lastrowid))
 
@@ -435,6 +438,9 @@ PROFILE_FIELDS = (
     "track",
     "target_locations",
     "email",
+    "background",
+    "goals",
+    "hard_constraints",
 )
 
 
@@ -459,3 +465,122 @@ def set_profile(conn: sqlite3.Connection, **fields: Any) -> dict:
             (*[merged[field] for field in PROFILE_FIELDS], now_iso()),
         )
     return get_profile(conn)
+
+
+# --------------------------------------------------------------------------
+# Resume
+# --------------------------------------------------------------------------
+
+
+def save_resume(conn: sqlite3.Connection, text: str) -> dict:
+    """Replace the stored resume. One row, always id 1."""
+    with conn:
+        conn.execute(
+            "INSERT OR REPLACE INTO resume (id, text, updated_at) VALUES (1, ?, ?)",
+            (text.strip(), now_iso()),
+        )
+    return get_resume(conn)
+
+
+def get_resume(conn: sqlite3.Connection) -> dict:
+    row = conn.execute("SELECT * FROM resume WHERE id = 1").fetchone()
+    return dict(row) if row else {"text": None, "updated_at": None}
+
+
+def add_resume_note(conn: sqlite3.Connection, note: str, kind: str = "update") -> dict:
+    """Log something that happened since the resume was last written."""
+    with conn:
+        cursor = conn.execute(
+            "INSERT INTO resume_notes (note, kind, added_on) VALUES (?, ?, ?)",
+            (note.strip(), kind.strip().lower(), today_iso()),
+        )
+    row = conn.execute(
+        "SELECT * FROM resume_notes WHERE id = ?", (int(cursor.lastrowid),)
+    ).fetchone()
+    return dict(row)
+
+
+def list_resume_notes(conn: sqlite3.Connection) -> list[dict]:
+    return _dicts(conn.execute("SELECT * FROM resume_notes ORDER BY added_on DESC, id DESC"))
+
+
+# --------------------------------------------------------------------------
+# Coaching views
+# --------------------------------------------------------------------------
+
+
+def stale_applications(conn: sqlite3.Connection, since: str, statuses: Sequence[str]) -> list[dict]:
+    """Applications sitting in an early status with no update since ``since``."""
+    placeholders = ", ".join("?" for _ in statuses)
+    rows = conn.execute(
+        f"""
+        SELECT * FROM applications
+         WHERE status IN ({placeholders})
+           AND updated_at < ?
+         ORDER BY updated_at ASC
+        """,
+        (*statuses, since),
+    )
+    return [_with_deadline_countdown(dict(row)) for row in rows]
+
+
+def upcoming_deadlines(conn: sqlite3.Connection, through: str) -> list[dict]:
+    rows = conn.execute(
+        """
+        SELECT * FROM applications
+         WHERE deadline IS NOT NULL
+           AND deadline <= ?
+           AND status NOT IN ('rejected', 'offer')
+         ORDER BY deadline ASC
+        """,
+        (through,),
+    )
+    return [_with_deadline_countdown(dict(row)) for row in rows]
+
+
+def targets_without_contact(conn: sqlite3.Connection) -> list[dict]:
+    """Target firms where nobody has been spoken to yet — the real gap."""
+    rows = conn.execute(
+        """
+        SELECT t.*
+          FROM targets t
+         WHERE NOT EXISTS (
+               SELECT 1
+                 FROM interactions i
+                 JOIN contacts c ON c.id = i.contact_id
+                WHERE c.company IS NOT NULL
+                  AND (
+                        LOWER(c.company) = LOWER(t.name)
+                     OR LOWER(c.company) LIKE LOWER(t.name) || '%'
+                     OR LOWER(t.name) LIKE LOWER(c.company) || '%'
+                  )
+         )
+         ORDER BY t.priority ASC, t.name COLLATE NOCASE ASC
+        """
+    )
+    return _dicts(rows)
+
+
+def going_cold(conn: sqlite3.Connection, before: str) -> list[dict]:
+    """Contacts spoken to once, then left alone, with no follow-up date set."""
+    rows = conn.execute(
+        """
+        WITH latest AS (
+            SELECT i.*,
+                   ROW_NUMBER() OVER (
+                       PARTITION BY i.contact_id
+                       ORDER BY i.occurred_at DESC, i.id DESC
+                   ) AS rank
+              FROM interactions i
+        )
+        SELECT c.*, latest.occurred_at AS last_occurred_at, latest.kind AS last_kind
+          FROM latest
+          JOIN contacts c ON c.id = latest.contact_id
+         WHERE latest.rank = 1
+           AND latest.next_followup IS NULL
+           AND latest.occurred_at < ?
+         ORDER BY latest.occurred_at ASC
+        """,
+        (before,),
+    )
+    return _dicts(rows)

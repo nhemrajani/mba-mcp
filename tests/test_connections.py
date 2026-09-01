@@ -54,6 +54,16 @@ def test_company_affinity_ranks_exact_above_partial():
     assert connections.company_affinity(None, "Bain") is None
 
 
+def test_generic_finance_words_do_not_create_false_matches():
+    # "capital" is half of finance; it must not link two unrelated firms.
+    assert connections.company_affinity("Bain Capital", "AQR Capital Management") is None
+    assert connections.company_affinity("Evercore Partners", "Perella Weinberg Partners") is None
+    # A distinctive shared token still counts.
+    assert connections.company_affinity("Goldman Sachs Asset Management", "Goldman Sachs") is not None
+    # And a real name overlap still ranks above nothing.
+    assert connections.company_affinity("Bain Capital", "Bain & Company")[0] == 55
+
+
 def test_score_contact_rewards_recruiters_and_alumni():
     base = {"full_name": "A", "company": "Bain & Company", "title": "Consultant"}
     recruiter = {**base, "title": "Campus Recruiting Lead"}

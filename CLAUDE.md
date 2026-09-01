@@ -5,11 +5,17 @@ independently shippable.
 
 ## Goal
 
-An open-source MCP server that runs a business-school student's recruiting
-campaign from inside their AI assistant (Claude Code / Claude Desktop). The
-assistant does the reasoning (tailoring, drafting, prep); the server provides
-state, data, and actions. Local-first, bring-your-own-keys, MIT-licensed, free
-to run.
+An open-source MCP server that lets an AI assistant act as a business-school
+student's recruiting coach. The assistant does the reasoning (coaching,
+tailoring, drafting, judgement of fit); the server provides memory, data and
+actions. Local-first, MIT-licensed, free to run — no keys required for anything
+on the main path.
+
+**The user is overwhelmed and non-technical.** They should never see a tool
+name, a file path, or a config file. The server's job is to remember everything
+so they never have to repeat themselves, and to hand the assistant enough real
+state that it can open with "these two things matter this week" instead of
+"tell me about yourself".
 
 ## The wedge — do not drift from this
 
@@ -35,7 +41,12 @@ unstructured/off-cycle.**
 - No third-party contact-enrichment services. Email inference works only from
   addresses the user already has, and every guess is labelled unverified.
 - No bulk/automated email sending. Every send is one message, explicitly
-  confirmed by the user.
+  confirmed by the user. Sending is an off-by-default extra, not part of setup:
+  the coach drafts, the human pastes. Anything that drags a Google Cloud
+  console into onboarding has failed the non-technical test.
+- No reading the user's Claude or ChatGPT conversation history — neither
+  product exposes it, and the server does not need it. The server *is* the
+  memory: state lives here, so every new chat starts informed.
 - The server makes no paid model API calls — the calling assistant does all
   language work. No model key required.
 
@@ -97,11 +108,27 @@ verified against the live API.
 
 ## MCP tools — v1
 
+### The coach
+
+- `weekly_checkin(lookahead_days?, stale_after_days?)` → everything needing
+  attention in one call: overdue follow-ups, closing deadlines, stalled
+  applications, contacts going cold, target firms with nobody spoken to, and
+  where the user sits in the cycle. Facts only — the coaching is the
+  assistant's job.
+- `suggest_targets(limit?, include_current?)` → candidate firms annotated with
+  what is *known* (board readable, people the user already knows there).
+  Deliberately does not score fit: "suits my profile" is a judgement about a
+  person, made by the assistant against the resume.
+- `save_resume(text)` → the CV, pasted straight into the chat. No files.
+- `add_resume_note(note, kind?)` → things that happened since the CV was
+  written, so the assistant can draw on them and refresh the CV later.
+
 ### Profile
 
 - `set_profile(school?, graduation_year?, track?, full_name?, email?,
-  target_locations?)` → the user's profile. School and graduation year are what
-  make alumni ranking and alumni search work; ask for them early.
+  target_locations?, background?, goals?, hard_constraints?)` → the user's
+  profile. School and graduation year drive alumni ranking; background, goals
+  and constraints drive fit. Fill these from conversation, not interrogation.
 
 ### Targets & discovery
 
@@ -147,8 +174,16 @@ verified against the live API.
 
 - `base_cv` — the user's master CV text/file (so the assistant can tailor
   against a JD)
+- `resume` — the stored CV plus every update logged since it was written
 - `profile`, `targets`, `pipeline`, `contacts`, `timeline` — current state, so
   the assistant reasons over real data
+
+## MCP prompts (how a coaching conversation starts)
+
+`start_here` (onboarding in one conversation) · `catch_me_up` (the Monday
+check-in) · `fit_check` (which firms suit me) · `tailor_application` (work
+through one posting). Prompt names must not collide with tool names — they
+share a Python module namespace even though MCP keeps separate registries.
 
 ## Build phases — each ships on its own
 
@@ -170,9 +205,12 @@ verified against the live API.
 - **Phase 5 — shipped.** Investment banking track; Workday and SmartRecruiters
   adapters; careers-page board discovery; profile and alumni tooling; email
   inference; starter packs; one-click `.mcpb` bundle for Claude Desktop.
-- **Phase 6 — later.** CV/cover-letter tailoring context; track-specific prep
-  (cases / technicals) and coursework help as skills grounded in the user's own
-  materials. Still not the wedge — do not lead with it.
+- **Phase 6 — shipped.** The coach layer: resume pasted into the chat, running
+  resume notes, the weekly check-in, fit-and-targeting data, coaching
+  instructions and prompt starters. Gmail sending demoted to an off-by-default
+  extra so nothing on the main path needs a terminal or a Google account.
+- **Phase 7 — later.** Track-specific prep (cases / technicals) grounded in the
+  user's own materials. Still not the wedge — do not lead with it.
 
 ## Guardrails for the build (repeat to yourself)
 

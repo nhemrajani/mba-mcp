@@ -19,6 +19,7 @@ from .config import Config, get_config
 from .db import session, today_iso
 from .models import (
     Application,
+    ResumeNote,
     Contact,
     EmailSuggestion,
     Followup,
@@ -32,22 +33,36 @@ from .models import (
 )
 
 INSTRUCTIONS = """
-Runs an MBA recruiting campaign: target firms, open roles, an application
-pipeline with cycle deadlines, a networking pipeline built from the user's own
-LinkedIn export, and human-approved outreach.
+You are this person's recruiting coach. They are a business-school student in
+the middle of a recruiting cycle, they are almost certainly overwhelmed, and
+they are not technical. Talk like a coach who knows them, not like a database.
 
-House rules, which this server enforces and you should respect:
-- Never auto-submit an application. Draft and track; the user submits.
-- send_email sends exactly one message and only with confirm=True. Show the
-  user the recipient, subject and full body, and get an explicit yes first.
-- Contacts come only from the user's LinkedIn CSV export. Never scrape
-  LinkedIn: find_alumni hands the user search links to open themselves.
-- Emails from suggest_email are unverified guesses. Show the address to the
-  user and get it confirmed before it is used to send anything.
-- Warm paths and timelines are inputs to your judgement, not scripts. Timeline
-  dates are a curated template — tell the user to confirm against their career
-  centre.
-""".strip()
+How to be useful:
+- Open by reading what you already know: the profile, resume, pipeline,
+  contacts and timeline resources. Never make them repeat themselves.
+- Lead with the two or three things that matter this week. A wall of
+  everything that is due is the same as saying nothing.
+- Be specific and concrete. "Priya's follow-up is four days overdue and PJT
+  closes Friday" beats "you have some outstanding items".
+- Ask for one thing at a time. If the profile is empty, get their school and
+  what they did before the MBA in conversation, then save it quietly with
+  set_profile.
+- When they mention something new — a case competition win, a chat that went
+  well, a firm they have gone off — write it down with add_resume_note or
+  log_interaction. They will not do it themselves.
+- Never mention tool names, file paths, or JSON to them.
+
+House rules this server enforces, which you should respect:
+- Never auto-submit an application. Draft and track; the human submits.
+- Contacts come only from the user's own LinkedIn export. Never scrape
+  LinkedIn: find_alumni hands them search links to open themselves.
+- Emails from suggest_email are unverified guesses. Show the address and get
+  it confirmed before it is used.
+- Timeline dates are a curated template, not live firm deadlines. Say so when
+  it matters, and tell them to confirm with their career centre.
+- If sending email is configured, send_email sends exactly one message and
+  only with confirm=True, after they have read the text and said yes.
+"""
 
 mcp = FastMCP(name="mba-mcp", instructions=INSTRUCTIONS)
 
@@ -231,10 +246,15 @@ def track_application(
     status: str = "interested",
     deadline: str | None = None,
     notes: str | None = None,
+    jd_text: str | None = None,
 ) -> dict:
     """Add a role to the application pipeline.
 
     This tracks an application; it never submits one.
+
+    Pass jd_text when the user has the posting to hand — storing it means you
+    can tailor their CV against the real requirements later instead of guessing
+    at what the firm asked for.
 
     Args:
         company: Firm name.
@@ -243,12 +263,13 @@ def track_application(
         status: interested | applied | interview | offer | rejected.
         deadline: ISO date (YYYY-MM-DD) the application is due.
         notes: Anything you want to remember about this one.
+        jd_text: The job description, pasted in full.
     """
     config = _config()
     with session(config.db_path) as conn:
         row = store.add_application(
             conn, company=company, role=role, url=url, status=status,
-            deadline=deadline, notes=notes,
+            deadline=deadline, notes=notes, jd_text=jd_text,
         )
     return Application(**row).model_dump()
 
@@ -581,12 +602,16 @@ def set_profile(
     full_name: str | None = None,
     email: str | None = None,
     target_locations: str | None = None,
+    background: str | None = None,
+    goals: str | None = None,
+    hard_constraints: str | None = None,
 ) -> dict:
     """Save who the user is. Ask for this once, at the start.
 
-    School and graduation year are what make alumni outreach work — they
-    decide who gets ranked as a warm path and what the LinkedIn alumni
-    searches are built from. Only the fields you pass are changed.
+    School and graduation year make alumni outreach work. Background, goals and
+    constraints are what let you judge fit properly instead of guessing — fill
+    them in from what the user tells you in conversation, not by interrogating
+    them. Only the fields you pass are changed.
 
     Args:
         school: Business school, e.g. "Wharton" or "London Business School".
@@ -595,6 +620,9 @@ def set_profile(
         full_name: The user's name, used when drafting outreach.
         email: The user's own email address.
         target_locations: Preferred cities, e.g. "New York, London".
+        background: What they did before the MBA, in their own words.
+        goals: What they actually want out of recruiting, including the honest version.
+        hard_constraints: Visa status, geography, family, anything non-negotiable.
     """
     config = _config()
     with session(config.db_path) as conn:
@@ -606,6 +634,9 @@ def set_profile(
             full_name=full_name,
             email=email,
             target_locations=target_locations,
+            background=background,
+            goals=goals,
+            hard_constraints=hard_constraints,
         )
     result = Profile(**row).model_dump()
     missing = [field for field in ("school", "graduation_year") if not row.get(field)]
@@ -868,6 +899,236 @@ def set_contact_email(contact_id: int, email: str) -> dict:
     return Contact(**row).model_dump()
 
 
+
+# --------------------------------------------------------------------------
+# The coach — resume, the weekly check-in, and fit
+# --------------------------------------------------------------------------
+
+
+@mcp.tool
+def save_resume(text: str) -> dict:
+    """Store the user's CV so it can be tailored against real postings.
+
+    The user pastes it straight into the chat — no files, no folders. Replaces
+    whatever was stored before, so read the current one back first if you are
+    only editing part of it.
+
+    Args:
+        text: The full CV as plain text or Markdown.
+    """
+    config = _config()
+    with session(config.db_path) as conn:
+        row = store.save_resume(conn, text)
+        notes = store.list_resume_notes(conn)
+    return {
+        "saved": True,
+        "characters": len(row["text"] or ""),
+        "updated_at": row["updated_at"],
+        "pending_updates": len(notes),
+        "next_step": (
+            "It is now available as the resume resource for tailoring. If they "
+            "mention something newer than the CV, capture it with add_resume_note."
+        ),
+    }
+
+
+@mcp.tool
+def add_resume_note(note: str, kind: str = "update") -> dict:
+    """Capture something that happened since the CV was last written.
+
+    A case competition win, a new leadership role, a project that finished.
+    These accumulate so the CV can be refreshed properly later, and so you can
+    draw on recent material the CV does not mention yet.
+
+    Args:
+        note: What happened, in enough detail to write a bullet from later.
+        kind: update | win | project | skill | feedback.
+    """
+    config = _config()
+    with session(config.db_path) as conn:
+        row = store.add_resume_note(conn, note, kind)
+    return ResumeNote(**row).model_dump()
+
+
+@mcp.tool
+def weekly_checkin(lookahead_days: int = 14, stale_after_days: int = 21) -> dict:
+    """Everything that needs attention this week, in one call.
+
+    This is the habit: what is overdue, what closes soon, who has gone quiet,
+    which target firms nobody has spoken to yet, and where the user sits in the
+    cycle. The numbers are facts — the coaching is yours. Lead with the two or
+    three things that actually matter, not the whole list.
+
+    Args:
+        lookahead_days: How far ahead to look for deadlines.
+        stale_after_days: How long an application sits untouched before it counts as stalled.
+    """
+    config = _config()
+    today = date.today()
+    horizon = (today + timedelta(days=max(0, lookahead_days))).isoformat()
+    stale_before = (today - timedelta(days=max(1, stale_after_days))).isoformat()
+
+    with session(config.db_path) as conn:
+        track = store.get_profile(conn).get("track") or config.track
+        overdue = store.due_followups(conn, today.isoformat())
+        deadlines = store.upcoming_deadlines(conn, horizon)
+        stalled = store.stale_applications(conn, stale_before, ("interested", "applied"))
+        cold = store.going_cold(conn, stale_before)
+        untouched = store.targets_without_contact(conn)
+        applications = store.list_applications(conn)
+        resume = store.get_resume(conn)
+        contacts = store.count_contacts(conn)
+
+    counts: dict[str, int] = {}
+    for row in applications:
+        counts[row["status"]] = counts.get(row["status"], 0) + 1
+
+    try:
+        cycle = timeline.get_timeline(track, overrides_dir=config.timeline_overrides_dir, today=today)
+        active = [m for m in cycle["milestones"] if m["status"] == "active"]
+        upcoming = [m for m in cycle["milestones"] if m["status"] == "upcoming"]
+        where_you_are = {
+            "track": cycle["track"],
+            "happening_now": [
+                {"name": m["name"], "ends_on": m["ends_on"], "actions": m["actions"]}
+                for m in active
+            ],
+            "next_up": (
+                {"name": upcoming[0]["name"], "starts_on": upcoming[0]["starts_on"],
+                 "days_away": upcoming[0]["days_until"]}
+                if upcoming else None
+            ),
+        }
+    except timeline.UnknownTrack:
+        where_you_are = {"track": track, "happening_now": [], "next_up": None}
+
+    return {
+        "today": today.isoformat(),
+        "where_you_are": where_you_are,
+        "overdue_followups": [
+            {
+                "contact_id": row["id"],
+                "name": row["full_name"],
+                "company": row["company"],
+                "due_on": row["due_on"],
+                "days_overdue": (today - date.fromisoformat(row["due_on"])).days,
+                "last_notes": row.get("last_notes"),
+            }
+            for row in overdue
+        ],
+        "deadlines": [
+            {
+                "id": row["id"],
+                "company": row["company"],
+                "role": row["role"],
+                "deadline": row["deadline"],
+                "days_left": row["days_until_deadline"],
+                "status": row["status"],
+            }
+            for row in deadlines
+        ],
+        "stalled_applications": [
+            {"id": row["id"], "company": row["company"], "role": row["role"],
+             "status": row["status"], "last_touched": row["updated_at"]}
+            for row in stalled
+        ],
+        "going_cold": [
+            {"contact_id": row["id"], "name": row["full_name"], "company": row["company"],
+             "last_spoke": row["last_occurred_at"]}
+            for row in cold
+        ],
+        "targets_nobody_has_spoken_to": [
+            {"name": row["name"], "priority": row["priority"]} for row in untouched
+        ],
+        "pipeline": counts,
+        "housekeeping": {
+            "resume_on_file": bool(resume.get("text")),
+            "resume_updated": resume.get("updated_at"),
+            "contacts_imported": contacts,
+        },
+    }
+
+
+@mcp.tool
+def suggest_targets(limit: int = 12, include_current: bool = False) -> dict:
+    """Firms worth considering, with the evidence needed to judge fit.
+
+    Returns candidates the user has not targeted yet, each annotated with what
+    is actually known: whether their job board can be read, and how many of the
+    user's own contacts already work there. Judge fit yourself against their
+    resume and background — this tool deliberately does not score it, because
+    "suits my profile" is a judgement about a person, not a lookup.
+
+    Args:
+        limit: Maximum candidates to return.
+        include_current: Also return firms already on the target list.
+    """
+    config = _config()
+    overrides = config.data_dir / "presets"
+
+    with session(config.db_path) as conn:
+        profile = store.get_profile(conn)
+        resume = store.get_resume(conn)
+        existing = {t["name"].strip().lower(): t for t in store.list_targets(conn)}
+        contacts = store.list_contacts(conn)
+
+    track = profile.get("track") or config.track
+    try:
+        pack = presets.load_pack(track, overrides_dir=overrides)
+    except presets.UnknownPack:
+        pack = {"companies": [], "label": track}
+
+    def contacts_at(company: str) -> list[dict]:
+        return [
+            contact
+            for contact in contacts
+            if connections.company_affinity(contact.get("company"), company)
+        ]
+
+    candidates = []
+    for entry in pack.get("companies", []):
+        already = entry["name"].strip().lower() in existing
+        if already and not include_current:
+            continue
+        inside = contacts_at(entry["name"])
+        candidates.append(
+            {
+                "name": entry["name"],
+                "careers_url": entry.get("careers_url"),
+                "board_readable": bool(entry.get("ats")),
+                "already_targeted": already,
+                "people_you_know_there": len(inside),
+                "who": [
+                    {"id": c["id"], "name": c["full_name"], "title": c.get("title")}
+                    for c in inside[:3]
+                ],
+                "tier_hint": entry.get("priority", 2),
+            }
+        )
+
+    candidates.sort(key=lambda c: (-c["people_you_know_there"], c["tier_hint"], c["name"]))
+
+    return {
+        "track": track,
+        "pack": pack.get("label", track),
+        "candidates": candidates[:limit],
+        "you": {
+            "background": profile.get("background"),
+            "goals": profile.get("goals"),
+            "hard_constraints": profile.get("hard_constraints"),
+            "target_locations": profile.get("target_locations"),
+            "resume_on_file": bool(resume.get("text")),
+        },
+        "how_to_use_this": (
+            "Read the resume resource, then say which of these actually fit and "
+            "which are a stretch, and why. Firms where they already know someone "
+            "are listed first because a warm path beats a marginally better fit. "
+            "If the list is thin, ask what they want and add firms yourself with "
+            "add_target_company."
+        ),
+    }
+
+
 # --------------------------------------------------------------------------
 # Resources — read-only state for the assistant to reason over
 # --------------------------------------------------------------------------
@@ -877,16 +1138,34 @@ def _json(payload: Any) -> str:
     return json.dumps(payload, indent=2, default=str)
 
 
+@mcp.resource("mba://resume", mime_type="text/markdown")
+def resume_resource() -> str:
+    """The user's CV, plus everything that has happened since it was written."""
+    config = _config()
+    with session(config.db_path) as conn:
+        stored = store.get_resume(conn)
+        notes = store.list_resume_notes(conn)
+
+    text = stored.get("text")
+    if not text and config.base_cv.is_file():
+        text = config.base_cv.read_text(encoding="utf-8", errors="replace")
+    if not text:
+        return (
+            "No CV on file yet. Ask the user to paste theirs into the chat and "
+            "store it with save_resume — they do not need to find a file or a folder."
+        )
+
+    parts = [text]
+    if notes:
+        parts.append("\n\n---\n\n## Since this CV was written\n")
+        parts.extend(f"- **{note['added_on']}** ({note['kind']}): {note['note']}" for note in notes)
+    return "\n".join(parts)
+
+
 @mcp.resource("mba://base_cv", mime_type="text/markdown")
 def base_cv() -> str:
-    """The user's master CV, for tailoring against a job description."""
-    config = _config()
-    if config.base_cv.is_file():
-        return config.base_cv.read_text(encoding="utf-8", errors="replace")
-    return (
-        f"No base CV found at {config.base_cv}. Save your master CV there as "
-        "text or Markdown (or point MBA_MCP_BASE_CV at it)."
-    )
+    """Deprecated alias for the resume resource."""
+    return resume_resource()
 
 
 @mcp.resource("mba://profile", mime_type="application/json")
@@ -939,6 +1218,80 @@ def timeline_resource() -> str:
         return _json(timeline.get_timeline(track, overrides_dir=config.timeline_overrides_dir))
     except timeline.UnknownTrack as exc:
         return _json({"error": str(exc)})
+
+
+
+
+# --------------------------------------------------------------------------
+# Prompts — how a coaching conversation starts
+# --------------------------------------------------------------------------
+
+
+@mcp.prompt
+def start_here() -> str:
+    """Set up the campaign from scratch, in one conversation."""
+    return (
+        "Help me set up my recruiting campaign. Ask me one question at a time, "
+        "in plain English, and save what I tell you as we go:\n\n"
+        "1. My name, business school and graduation year.\n"
+        "2. What I did before the MBA, and what I actually want out of "
+        "recruiting — including the honest version, not the interview answer.\n"
+        "3. Anything non-negotiable: visa status, city, family.\n"
+        "4. Which track I am recruiting for.\n"
+        "5. Then ask me to paste my CV straight into the chat.\n\n"
+        "Once you have that, seed a target list for my track, tell me where I "
+        "am in the cycle right now, and give me the two things to do this week. "
+        "Then explain, in one short paragraph, what you can do for me from here."
+    )
+
+
+@mcp.prompt
+def catch_me_up() -> str:
+    """The Monday-morning coaching session. (The weekly_checkin tool feeds it.)"""
+    return (
+        "Run my weekly check-in. Look at what is overdue, what closes soon, who "
+        "has gone quiet, and which of my target firms I still have not spoken to "
+        "anyone at.\n\n"
+        "Then coach me: tell me the two or three things that actually matter this "
+        "week and why, in order. Be direct about anything I am letting slip. End "
+        "with a short list of what to do, specific enough that I can start on it "
+        "now — names, firms, dates."
+    )
+
+
+@mcp.prompt
+def fit_check() -> str:
+    """Which firms actually suit me, and where am I stretching?"""
+    return (
+        "Read my CV and my profile, then look at the firms worth considering for "
+        "my track.\n\n"
+        "Tell me honestly: which of these fit my background, which are a stretch "
+        "and what would have to be true for the stretch ones to work, and which I "
+        "should drop. Say where my story is strong and where it is thin for this "
+        "track. If there are firms outside the list that suit me better given what "
+        "I actually want, say so and add them."
+    )
+
+
+@mcp.prompt
+def tailor_application(company: str, role: str = "") -> str:
+    """Tailor the CV and application material to one specific posting."""
+    return (
+        f"I am applying to {company}"
+        + (f" for the {role} role" if role else "")
+        + ". Use the job description I have stored for it if there is one; ask me "
+        "to paste it if not.\n\n"
+        "Then work through it with me:\n"
+        "1. What this firm is actually screening for in this role.\n"
+        "2. Which of my experiences map onto that, using my real CV and anything "
+        "I have added since — quote my own wording back to me and sharpen it.\n"
+        "3. Where I am weak against this posting, and how to handle that honestly "
+        "rather than hide it.\n"
+        "4. A tailored version of the relevant CV bullets, and my 'why this firm' "
+        "answer in three sentences.\n\n"
+        "Do not invent experience I do not have. If something is missing, tell me "
+        "it is missing."
+    )
 
 
 def main() -> None:

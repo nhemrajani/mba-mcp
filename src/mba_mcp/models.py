@@ -54,6 +54,7 @@ class Application(BaseModel):
     status: str = "interested"
     deadline: str | None = None
     notes: str | None = None
+    jd_text: str | None = None
     created_at: str
     updated_at: str
     days_until_deadline: int | None = None
@@ -69,7 +70,17 @@ class Profile(BaseModel):
     track: str | None = None
     target_locations: str | None = None
     email: str | None = None
+    background: str | None = None
+    goals: str | None = None
+    hard_constraints: str | None = None
     updated_at: str | None = None
+
+
+class ResumeNote(BaseModel):
+    id: int
+    note: str
+    kind: str = "update"
+    added_on: str
 
 
 class Contact(BaseModel):

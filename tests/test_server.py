@@ -313,15 +313,133 @@ def test_resources_expose_current_state(fixtures_dir):
     assert json.loads(call(server.pipeline_resource))["applications"][0]["role"] == "Summer Associate"
     assert json.loads(call(server.contacts_resource))["total"] == 4
     assert json.loads(call(server.timeline_resource))["track"] == "consulting"
-    assert "No base CV found" in call(server.base_cv)
+    assert "No CV on file yet" in call(server.base_cv)
 
 
-def test_base_cv_resource_reads_the_users_file(tmp_path, monkeypatch):
+def test_resume_resource_falls_back_to_a_file(tmp_path, monkeypatch):
     cv = tmp_path / "cv.md"
     cv.write_text("# Neeharika\nWharton MBA", encoding="utf-8")
     monkeypatch.setenv("MBA_MCP_BASE_CV", str(cv))
     config_module.get_config(refresh=True)
-    assert "Wharton MBA" in call(server.base_cv)
+    assert "Wharton MBA" in call(server.resume_resource)
+
+
+# --------------------------------------------------------------------------
+# The coach
+# --------------------------------------------------------------------------
+
+
+def test_pasted_resume_wins_over_a_file_and_carries_updates(tmp_path, monkeypatch):
+    cv = tmp_path / "cv.md"
+    cv.write_text("stale file version", encoding="utf-8")
+    monkeypatch.setenv("MBA_MCP_BASE_CV", str(cv))
+    config_module.get_config(refresh=True)
+
+    saved = call(server.save_resume, text="# Neeharika\nPre-MBA: product at a fintech")
+    assert saved["saved"] and saved["characters"] > 10
+
+    call(server.add_resume_note, note="Won the Wharton case competition", kind="win")
+    rendered = call(server.resume_resource)
+    assert "Pre-MBA: product at a fintech" in rendered
+    assert "stale file version" not in rendered
+    assert "Since this CV was written" in rendered
+    assert "case competition" in rendered
+
+
+def test_weekly_checkin_gathers_everything_due(fixtures_dir):
+    from datetime import date, timedelta
+
+    call(server.set_profile, school="Wharton", track="finance")
+    call(server.add_target_pack, pack="finance", priority_max=1, resolve=False)
+    call(server.import_connections, csv_path=str(fixtures_dir / "connections.csv"))
+
+    soon = (date.today() + timedelta(days=5)).isoformat()
+    call(server.track_application, company="PJT Partners", role="Summer Associate", deadline=soon)
+
+    contact_id = call(server.find_warm_paths, company="Bain & Company")["paths"][0]["contact"]["id"]
+    call(
+        server.log_interaction,
+        contact_id=contact_id,
+        kind="coffee_chat",
+        notes="Wants a follow-up",
+        next_followup=(date.today() - timedelta(days=2)).isoformat(),
+    )
+
+    check = call(server.weekly_checkin)
+    assert check["today"] == date.today().isoformat()
+    assert check["overdue_followups"][0]["days_overdue"] == 2
+    assert check["deadlines"][0]["company"] == "PJT Partners"
+    assert check["deadlines"][0]["days_left"] == 5
+    assert check["pipeline"] == {"interested": 1}
+    assert check["where_you_are"]["track"] == "investment_banking"
+    # Every seeded firm still has nobody spoken to.
+    assert len(check["targets_nobody_has_spoken_to"]) >= 5
+    assert check["housekeeping"]["contacts_imported"] == 4
+    assert check["housekeeping"]["resume_on_file"] is False
+
+
+def test_weekly_checkin_flags_stalled_and_cold(fixtures_dir):
+    from datetime import date, timedelta
+
+    call(server.import_connections, csv_path=str(fixtures_dir / "connections.csv"))
+    contact_id = call(server.find_warm_paths, company="Bain & Company")["paths"][0]["contact"]["id"]
+    long_ago = (date.today() - timedelta(days=60)).isoformat()
+    # Spoken to once, months ago, with no follow-up set: gone cold.
+    call(server.log_interaction, contact_id=contact_id, kind="coffee_chat", occurred_at=long_ago)
+
+    check = call(server.weekly_checkin)
+    assert check["going_cold"][0]["name"] == "Priya Raman"
+    assert check["going_cold"][0]["last_spoke"] == long_ago
+    assert check["overdue_followups"] == []
+
+
+def test_weekly_checkin_is_calm_when_nothing_is_due():
+    check = call(server.weekly_checkin)
+    assert check["overdue_followups"] == []
+    assert check["deadlines"] == []
+    assert check["going_cold"] == []
+    assert check["pipeline"] == {}
+
+
+def test_suggest_targets_puts_firms_you_know_people_at_first(fixtures_dir):
+    call(server.set_profile, track="finance", background="product at a fintech")
+    call(server.import_connections, csv_path=str(fixtures_dir / "connections.csv"))
+    # Tom Okafor works at Bain Capital; seed a firm we can match him against.
+    call(server.set_profile, goals="buyside eventually")
+
+    result = call(server.suggest_targets)
+    assert result["track"] == "investment_banking"
+    assert result["you"]["background"] == "product at a fintech"
+    assert result["you"]["resume_on_file"] is False
+    names = [c["name"] for c in result["candidates"]]
+    assert "PJT Partners" in names
+    assert all(c["already_targeted"] is False for c in result["candidates"])
+    # Boards we have verified are flagged as readable.
+    pjt = next(c for c in result["candidates"] if c["name"] == "PJT Partners")
+    assert pjt["board_readable"] is True
+
+
+def test_suggest_targets_hides_firms_already_targeted():
+    call(server.set_profile, track="finance")
+    call(server.add_target_pack, pack="finance", priority_max=1, resolve=False)
+    result = call(server.suggest_targets)
+    assert "PJT Partners" not in [c["name"] for c in result["candidates"]]
+    everything = call(server.suggest_targets, include_current=True)
+    assert "PJT Partners" in [c["name"] for c in everything["candidates"]]
+
+
+def test_application_remembers_the_job_description():
+    import json
+
+    app = call(
+        server.track_application,
+        company="PJT Partners",
+        role="Summer Associate",
+        jd_text="We are looking for an MBA associate with restructuring exposure.",
+    )
+    assert "restructuring" in app["jd_text"]
+    pipeline = json.loads(call(server.pipeline_resource))
+    assert "restructuring" in pipeline["applications"][0]["jd_text"]
 
 
 # --------------------------------------------------------------------------

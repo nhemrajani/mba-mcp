@@ -22,6 +22,17 @@ COMPANY_NOISE = {
     "bv", "ag", "holdings", "holding", "group", "the", "and", "&",
 }
 
+# Words that are common to half of finance and consulting. They are kept during
+# normalisation (Bain Capital and Bain & Company are different firms and must
+# not collapse into each other) but they cannot carry a match on their own —
+# otherwise AQR Capital Management "matches" Bain Capital on the word capital.
+GENERIC_TOKENS = {
+    "capital", "partners", "partner", "management", "advisors", "advisory",
+    "associates", "ventures", "securities", "bank", "banking", "financial",
+    "finance", "global", "international", "consulting", "consultants",
+    "solutions", "services", "asset", "investments", "investment", "equity",
+}
+
 # Title signals. Juniors answer cold notes; seniors carry weight when they do.
 JUNIOR_TITLES = (
     "analyst", "associate", "consultant", "intern", "summer", "graduate",
@@ -162,7 +173,7 @@ def company_affinity(contact_company: str | None, target: str) -> tuple[int, str
     if left_tokens <= right_tokens or right_tokens <= left_tokens:
         return 55, f"at {contact_company} (name matches {target})"
 
-    shared = left_tokens & right_tokens
+    shared = (left_tokens & right_tokens) - GENERIC_TOKENS
     if shared:
         return 40, f"at {contact_company} (shares '{' '.join(sorted(shared))}' with {target})"
     return None
