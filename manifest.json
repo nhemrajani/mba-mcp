@@ -6,7 +6,15 @@
   "description": "Run your MBA recruiting campaign from inside Claude: target firms, live job boards, deadlines, warm intros and approved outreach.",
   "long_description": "MBA recruiting is won on timelines and relationships, not application volume. This adds a campaign layer to Claude: a target-firm list that resolves each firm's live job board, an application pipeline with cycle-aware deadlines for consulting and investment banking, warm paths ranked from your own LinkedIn export, LinkedIn alumni searches you run yourself, and cold emails Claude drafts and you approve before a single message is sent from your own Gmail.\n\nEverything stays on your computer. No account, no subscription, no model API key, and no scraping of anyone's LinkedIn.",
   "author": {
-    "name": "Neeharika Hemrajani"
+    "name": "Neeharika Hemrajani",
+    "url": "https://github.com/nhemrajani"
+  },
+  "homepage": "https://github.com/nhemrajani/mba-mcp",
+  "documentation": "https://github.com/nhemrajani/mba-mcp#readme",
+  "support": "https://github.com/nhemrajani/mba-mcp/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nhemrajani/mba-mcp"
   },
   "license": "MIT",
   "keywords": ["mba", "recruiting", "jobs", "networking", "consulting", "investment banking", "careers"],

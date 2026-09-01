@@ -38,13 +38,13 @@ This gives Claude that memory. It's free, it runs entirely on your laptop, and t
 ### The terminal way — Claude Code, one line
 
 ```bash
-claude mcp add mba-mcp --env MBA_MCP_SCHOOL="Wharton" --env MBA_MCP_TRACK="consulting" -- uvx --from git+https://github.com/YOUR-GITHUB-USERNAME/mba-mcp mba-mcp
+claude mcp add mba-mcp --env MBA_MCP_SCHOOL="Wharton" --env MBA_MCP_TRACK="consulting" -- uvx --from git+https://github.com/nhemrajani/mba-mcp mba-mcp
 ```
 
 Or clone it and point Claude at the checkout:
 
 ```bash
-git clone https://github.com/YOUR-GITHUB-USERNAME/mba-mcp && cd mba-mcp
+git clone https://github.com/nhemrajani/mba-mcp && cd mba-mcp
 python3 -m venv .venv && source .venv/bin/activate
 pip install -e '.[gmail]'
 mba-mcp info    # shows where your data will live

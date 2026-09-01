@@ -36,8 +36,8 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/YOUR-GITHUB-USERNAME/mba-mcp"
-Issues = "https://github.com/YOUR-GITHUB-USERNAME/mba-mcp/issues"
+Homepage = "https://github.com/nhemrajani/mba-mcp"
+Issues = "https://github.com/nhemrajani/mba-mcp/issues"
 
 [project.scripts]
 mba-mcp = "mba_mcp.__main__:main"
